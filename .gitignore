@@ -15,6 +15,7 @@
 *.iws
 *.iml
 *.ipr
+app.log
 
 ### NetBeans ###
 /nbproject/private/
