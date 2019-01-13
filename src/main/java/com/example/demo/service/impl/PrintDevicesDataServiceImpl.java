@@ -28,38 +28,48 @@ public class PrintDevicesDataServiceImpl implements PrintDevicesDataService{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<PrintDevicesData> getAll(Job job, Sort sort) {
-        List<PrintDevicesData> printDevicesDataList = printDevicesDataRepository.findAll(new PrintDevicesDataSpecification(job), sort);
-        logger.debug("Успешно получили данные из базы данных");
-        return printDevicesDataList;
+    public List<PrintDevicesData> getAll(Job job, Sort sort) throws NullPointerException{
+        try {
+            List<PrintDevicesData> printDevicesDataList = printDevicesDataRepository.findAll(new PrintDevicesDataSpecification(job), sort);
+            logger.debug("Успешно получили данные из базы данных");
+            return printDevicesDataList;
+        } catch (Exception e) {
+            logger.error("Не получилось получить данные в базу данных");
+            throw e;
+        }
     }
 
     @Override
     @Transactional(propagation = Propagation.NESTED)
-    public Map<String, String> saveAndGetSumAmountToUser(Jobs jobs) {
+    public Map<String, String> saveAndGetSumAmountToUser(Jobs jobs) throws NullPointerException {
         PrintDevicesData printDevicesData;
-        for (Job job: jobs.getJob()) {
-            printDevicesData = new PrintDevicesData();
+        try {
+            for (Job job: jobs.getJob()) {
+                printDevicesData = new PrintDevicesData();
 
-            PrintDevicesData oldPrintDevicesData = printDevicesDataRepository.findAllByJobIdAndDevice(job.getJobId(), job.getDevice());
-            if(oldPrintDevicesData != null) {
-                printDevicesData.setId(oldPrintDevicesData.getId());
-                logger.debug("Запись с Id " + oldPrintDevicesData.getId() + " была обновлена");
+                PrintDevicesData oldPrintDevicesData = printDevicesDataRepository.findAllByJobIdAndDevice(job.getJobId(), job.getDevice());
+                if(oldPrintDevicesData != null) {
+                    printDevicesData.setId(oldPrintDevicesData.getId());
+                    logger.debug("Запись с Id " + oldPrintDevicesData.getId() + " была обновлена");
+                }
+
+                printDevicesData.setJobId(job.getJobId())
+                                .setType(job.getType())
+                                .setUser(job.getUser())
+                                .setDevice(job.getDevice())
+                                .setAmount(job.getAmount())
+                                .setTime(Calendar.getInstance().getTime());
+                printDevicesDataRepository.save(printDevicesData);
+                logger.debug("Успешно сохранили запись " + printDevicesData.toString() + " в базу данных");
             }
 
-            printDevicesData.setJobId(job.getJobId())
-                            .setType(job.getType())
-                            .setUser(job.getUser())
-                            .setDevice(job.getDevice())
-                            .setAmount(job.getAmount())
-                            .setTime(Calendar.getInstance().getTime());
-            printDevicesDataRepository.save(printDevicesData);
-            logger.debug("Успешно сохранили запись " + oldPrintDevicesData.toString() + " в базу данных");
+            Map<String, List<Job>> result = jobs.getJob().stream().collect(Collectors.groupingBy(Job::getUser));
+            Map<String, String> sum = new HashMap<>();
+            result.forEach((x, y ) -> sum.put(x, String.valueOf(y.stream().mapToInt(Job::getAmount).sum())));
+            return sum;
+        } catch (Exception e) {
+            logger.error("Не получилось записать данные в базу данных");
+           throw e;
         }
-
-        Map<String, List<Job>> result = jobs.getJob().stream().collect(Collectors.groupingBy(Job::getUser));
-        Map<String, String> sum = new HashMap<>();
-        result.forEach((x, y ) -> sum.put(x, String.valueOf(y.stream().mapToInt(Job::getAmount).sum())));
-        return sum;
     }
 }

@@ -20,14 +20,14 @@ public class PrintDevicesDataController {
 
     // вывод всех вкладов
     @RequestMapping(value = "/jobs", method = RequestMethod.POST)
-    public Map<String, String> getContributions(@RequestBody Jobs jobs) {
+    public Map<String, String> getAmountPage(@RequestBody Jobs jobs) throws NullPointerException{
         return printDevicesDataService.saveAndGetSumAmountToUser(jobs);
     }
 
     // вывод всех вкладов
     @RequestMapping(value = "/statistics", method = RequestMethod.GET)
-    public List<PrintDevicesData> getContributions(@ModelAttribute Job job,
-                                                   @SortDefault(sort = "id") Sort sort) {
+    public List<PrintDevicesData> getPrintDevicesData(@ModelAttribute Job job,
+                                                   @SortDefault(sort = "id") Sort sort) throws NullPointerException{
         return printDevicesDataService.getAll(job, sort);
     }
 }

@@ -28,24 +28,24 @@ public class PrintDevicesData {
     @JsonIgnore(value = true)
     private Long id;
 
-    @Column(name = "job_id")
+    @Column(name = "job_id", nullable = false)
     private Long jobId;
 
-    @Column(name = "device")
+    @Column(name = "device", nullable = false)
     private String device;
 
-    @Column(name = "user")
+    @Column(name = "user", nullable = false)
     private String user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     private Type type;
 
-    @Column(name = "amount")
+    @Column(name = "amount", nullable = false)
     private Integer amount;
 
     @DateTimeFormat(pattern = DATE_PATTERN)
-    @Column(name = "time")
+    @Column(name = "time", nullable = false)
     @JsonFormat(pattern = DATE_PATTERN, timezone = TIME_ZONE)
     private Date time;
 }
