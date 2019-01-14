@@ -40,7 +40,7 @@ public class PrintDevicesDataServiceImpl implements PrintDevicesDataService{
     }
 
     @Override
-    @Transactional(propagation = Propagation.NESTED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Map<String, String> saveAndGetSumAmountToUser(Jobs jobs) throws NullPointerException {
         
         PrintDevicesData printDevicesData;
@@ -55,34 +55,40 @@ public class PrintDevicesDataServiceImpl implements PrintDevicesDataService{
             printDevicesData = new PrintDevicesData();
 
             PrintDevicesData oldPrintDevicesData = getPrintDevicesData(job);
-                
-            if(oldPrintDevicesData != null) {
-                printDevicesData.setId(oldPrintDevicesData.getId());
-                logger.debug("Запись с Id " + oldPrintDevicesData.getId() + " была обновлена");
-            }
 
-            printDevicesData.setJobId(job.getJobId())
-                            .setType(job.getType())
-                            .setUser(job.getUser())
-                            .setDevice(job.getDevice())
-                            .setAmount(job.getAmount())
-                            .setTime(Calendar.getInstance().getTime());
-            
-            printDevicesDataRepository.save(printDevicesData);
-            
-            logger.debug("Успешно сохранили запись " + printDevicesData.toString() + " в базу данных");
+            savePrintDevicesData(printDevicesData , job, oldPrintDevicesData.getId());
         }
                 
         Map<String, List<Job>> result = jobs.getJob().stream().collect(Collectors.groupingBy(Job::getUser));
         Map<String, String> sum = new HashMap<>();
         result.forEach((x, y ) -> sum.put(x, String.valueOf(y.stream().mapToInt(Job::getAmount).sum())));
-        return sum; 
-            
+        return sum;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.MANDATORY)
     public PrintDevicesData getPrintDevicesData(Job job) {
         return printDevicesDataRepository.findByJobIdAndDevice(job.getJobId(), job.getDevice());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void savePrintDevicesData(PrintDevicesData printDevicesData, Job job, Long id) {
+
+        if(id != null) {
+            printDevicesData.setId(id);
+            logger.debug("Запись с Id " + id + " была обновлена");
+        }
+
+        printDevicesData.setJobId(job.getJobId())
+                .setType(job.getType())
+                .setUser(job.getUser())
+                .setDevice(job.getDevice())
+                .setAmount(job.getAmount())
+                .setTime(Calendar.getInstance().getTime());
+
+        printDevicesDataRepository.save(printDevicesData);
+
+        logger.debug("Успешно сохранили запись " + printDevicesData.toString() + " в базу данных");
     }
 }

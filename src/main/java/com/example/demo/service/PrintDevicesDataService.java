@@ -16,4 +16,7 @@ public interface PrintDevicesDataService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     PrintDevicesData getPrintDevicesData(Job job);
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    void savePrintDevicesData(PrintDevicesData printDevicesData, Job job, Long id);
 }
