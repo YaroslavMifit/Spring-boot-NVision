@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface PrintDevicesDataRepository extends JpaRepository<PrintDevicesData, Long>, JpaSpecificationExecutor<PrintDevicesData> {
 
-    PrintDevicesData findAllByJobIdAndDevice(Long jobId, String device);
+    PrintDevicesData findByJobIdAndDevice(Long jobId, String device);
 }

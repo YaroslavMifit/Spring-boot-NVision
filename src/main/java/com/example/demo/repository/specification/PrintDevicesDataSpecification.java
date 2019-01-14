@@ -1,6 +1,6 @@
 package com.example.demo.repository.specification;
 
-import com.example.demo.entity.Job;
+import com.example.demo.form.Job;
 import com.example.demo.entity.PrintDevicesData;
 import org.springframework.data.jpa.domain.Specification;
 

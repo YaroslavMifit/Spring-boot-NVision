@@ -1,12 +1,12 @@
-package com.example.demo.entity;
+package com.example.demo.form;
 
+import com.example.demo.entity.Type;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -41,12 +41,10 @@ public class Job {
     private Integer amount;
 
     @DateTimeFormat(pattern = DATE_PATTERN)
-    @Column(name = "time")
     @JsonFormat(pattern = DATE_PATTERN, timezone = TIME_ZONE)
     private Date timeFrom;
 
     @DateTimeFormat(pattern = DATE_PATTERN)
-    @Column(name = "time")
     @JsonFormat(pattern = DATE_PATTERN, timezone = TIME_ZONE)
     private Date timeTo;
 }

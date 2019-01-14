@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.Job;
-import com.example.demo.entity.Jobs;
+import com.example.demo.form.Job;
+import com.example.demo.form.Jobs;
 import com.example.demo.entity.PrintDevicesData;
 import com.example.demo.repository.PrintDevicesDataRepository;
 import com.example.demo.repository.specification.PrintDevicesDataSpecification;
@@ -28,13 +28,13 @@ public class PrintDevicesDataServiceImpl implements PrintDevicesDataService{
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<PrintDevicesData> getAll(Job job, Sort sort) throws NullPointerException{
+    public List<PrintDevicesData> getAllWithFilter(Job job, Sort sort) {
         try {
             List<PrintDevicesData> printDevicesDataList = printDevicesDataRepository.findAll(new PrintDevicesDataSpecification(job), sort);
             logger.debug("Успешно получили данные из базы данных");
             return printDevicesDataList;
         } catch (Exception e) {
-            logger.error("Не получилось получить данные в базу данных");
+            logger.error("Не получилось получить данные из базы данных", e);
             throw e;
         }
     }
@@ -42,34 +42,47 @@ public class PrintDevicesDataServiceImpl implements PrintDevicesDataService{
     @Override
     @Transactional(propagation = Propagation.NESTED)
     public Map<String, String> saveAndGetSumAmountToUser(Jobs jobs) throws NullPointerException {
+        
         PrintDevicesData printDevicesData;
-        try {
-            for (Job job: jobs.getJob()) {
-                printDevicesData = new PrintDevicesData();
+       
+        for (Job job : jobs.getJob()) {
+                
+            if (job.getJobId() == null || job.getUser() == null || job.getAmount() == null || job.getDevice() == null || job.getType() == null){
+                logger.error("Один или несколько переданных параметров не были заполнены");
+                throw new NullPointerException("Один или несколько переданных параметров не были заполнены");
+            }
+                
+            printDevicesData = new PrintDevicesData();
 
-                PrintDevicesData oldPrintDevicesData = printDevicesDataRepository.findAllByJobIdAndDevice(job.getJobId(), job.getDevice());
-                if(oldPrintDevicesData != null) {
-                    printDevicesData.setId(oldPrintDevicesData.getId());
-                    logger.debug("Запись с Id " + oldPrintDevicesData.getId() + " была обновлена");
-                }
-
-                printDevicesData.setJobId(job.getJobId())
-                                .setType(job.getType())
-                                .setUser(job.getUser())
-                                .setDevice(job.getDevice())
-                                .setAmount(job.getAmount())
-                                .setTime(Calendar.getInstance().getTime());
-                printDevicesDataRepository.save(printDevicesData);
-                logger.debug("Успешно сохранили запись " + printDevicesData.toString() + " в базу данных");
+            PrintDevicesData oldPrintDevicesData = getPrintDevicesData(job);
+                
+            if(oldPrintDevicesData != null) {
+                printDevicesData.setId(oldPrintDevicesData.getId());
+                logger.debug("Запись с Id " + oldPrintDevicesData.getId() + " была обновлена");
             }
 
-            Map<String, List<Job>> result = jobs.getJob().stream().collect(Collectors.groupingBy(Job::getUser));
-            Map<String, String> sum = new HashMap<>();
-            result.forEach((x, y ) -> sum.put(x, String.valueOf(y.stream().mapToInt(Job::getAmount).sum())));
-            return sum;
-        } catch (Exception e) {
-            logger.error("Не получилось записать данные в базу данных");
-           throw e;
+            printDevicesData.setJobId(job.getJobId())
+                            .setType(job.getType())
+                            .setUser(job.getUser())
+                            .setDevice(job.getDevice())
+                            .setAmount(job.getAmount())
+                            .setTime(Calendar.getInstance().getTime());
+            
+            printDevicesDataRepository.save(printDevicesData);
+            
+            logger.debug("Успешно сохранили запись " + printDevicesData.toString() + " в базу данных");
         }
+                
+        Map<String, List<Job>> result = jobs.getJob().stream().collect(Collectors.groupingBy(Job::getUser));
+        Map<String, String> sum = new HashMap<>();
+        result.forEach((x, y ) -> sum.put(x, String.valueOf(y.stream().mapToInt(Job::getAmount).sum())));
+        return sum; 
+            
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public PrintDevicesData getPrintDevicesData(Job job) {
+        return printDevicesDataRepository.findByJobIdAndDevice(job.getJobId(), job.getDevice());
     }
 }
