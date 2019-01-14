@@ -27,7 +27,6 @@ public class Job {
     @XmlAttribute(name = "id")
     private Long jobId;
 
-    @Enumerated(EnumType.STRING)
     @XmlElement(name = "type")
     private Type type;
 
