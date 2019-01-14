@@ -2,13 +2,19 @@ package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class PrintDevicesDataApplication {
+public class PrintDevicesDataApplication extends SpringBootServletInitializer {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PrintDevicesDataApplication.class, args);
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(PrintDevicesDataApplication.class);
 	}
 
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(PrintDevicesDataApplication.class, args);
+	}
 }
 
