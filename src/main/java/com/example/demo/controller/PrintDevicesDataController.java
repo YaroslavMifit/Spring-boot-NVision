@@ -18,13 +18,13 @@ public class PrintDevicesDataController {
     @Autowired
     private PrintDevicesDataService printDevicesDataService;
 
-    // вывод всех вкладов
+    // Сохранение XML в базу и получение колличества страниц
     @RequestMapping(value = "/jobs", method = RequestMethod.POST)
     public Map<String, String> getAmountPage(@RequestBody Jobs jobs) {
         return printDevicesDataService.saveAndGetSumAmountToUser(jobs);
     }
 
-    // вывод всех вкладов
+    // вывод полной или отсортированной и отфильтрованной статистики
     @RequestMapping(value = "/statistics", method = RequestMethod.GET)
     public List<PrintDevicesData> getPrintDevicesData(@ModelAttribute Job job,
                                                    @SortDefault(sort = "id") Sort sort){
